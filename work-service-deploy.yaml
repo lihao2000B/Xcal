@@ -1,0 +1,39 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: work-service
+  namespace: user-hao-li
+spec:
+  components:
+    - name: work-service
+      type: webservice
+      properties:
+        image: "metabit-registry-registry-vpc.cn-zhangjiakou.cr.aliyuncs.com/metabit-public/brewer-server:latest"
+        imagePullPolicy: "Always"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        env:
+          - name: QUEUE_BASE_URL
+            value: "http://work-queue.user-hao-li:8009"
+        ports:
+          - port: 8006
+            expose: true
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+        - type: expose
+          properties:
+            port: [8006]
+            type: "NodePort"
+        - type: storage
+          properties:
+            configMap:
+              - name: config-work-service
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    git clone --branch master https://gitlab.corp.metabit-trading.com/hao.li/job-test.git ~/job-test
+                    cd ~/job-test/service
+                    uvicorn main:app --host=0.0.0.0 --port=8006

@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+import base64
+import datetime
+from enum import Enum
+import getpass
+import json
+import os
+import re
+import stat
+import string
+import subprocess
+import sys
+import random
+from typing import Dict, List, Optional
+import git
+from pathlib import Path
+
+import requests
+import rich
+import typer
+import yaml
+from cryptography.hazmat.backends import default_backend as crypto_default_backend
+from cryptography.hazmat.primitives import serialization as crypto_serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from jinja2 import Environment, FileSystemLoader
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from typer import Argument
+
+app = typer.Typer()
+
+BASE_URL = "http://10.72.16.50:30114"
+
+WORK_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent / "workdir"
+
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    NORED = "\033[91m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
+@app.command(help="test url")
+def sayhi():
+    payload = ""
+    headers = {}
+
+    response = requests.request("GET", BASE_URL, headers=headers, data=payload)
+
+    print(response.text)
+
+
+@app.command(help="create a job and run it")
+def create(
+    job_name: str = typer.Argument(..., help="name of job"),
+    secript_list: Optional[List[Path]] = typer.Option(
+        ..., "--file", "-f", help="list of files except data"
+    ),
+    data_list: Optional[List[Path]] = typer.Option(
+        ..., "--data", "-d", help="list of data file"
+    ),
+    group_num: int = typer.Option(
+        1000, "--group_num", "-g", help="data num in a group"
+    ),
+    min_data_group: int = typer.Option(
+        1, "--min_num", "-m", help="min data num in a group"
+    )
+):
+
+    payload={
+        'job_name': job_name,
+        'work_data_num': group_num,
+        'min_data_group': min_data_group
+    }
+    
+    files = []
+
+    for script_file in secript_list:
+        temp_file = open(script_file, 'rb')
+        files.append(
+            (
+                'script_files',
+                (
+                    temp_file.name,
+                    temp_file,
+                    # 'application/octet-stream'
+                )
+            )        
+        )
+    
+    for data_file in data_list:
+        temp_file = open(data_file,'rb')
+        files.append(
+            (
+                'data_files',
+                (
+                    temp_file.name,
+                    temp_file,
+                    # 'application/octet-stream'
+                )
+            )        
+        )
+
+    headers = {}
+
+    response = requests.request(
+        "POST",
+        BASE_URL + "/begin_job",
+        headers=headers,
+        data=payload,
+        files=files
+    )
+
+
+    result = response.json()
+
+    if response.status_code != 200:
+        print(
+            bcolors.NORED
+            + result["detail"]
+            + bcolors.ENDC
+        )
+        return 
+
+    print(
+        bcolors.OKGREEN
+        + "OK!"
+        + bcolors.ENDC
+    )
+    print(
+        "work_queue_len: "
+        + bcolors.OKGREEN
+        + str(result["data_response"]["work_queue_len"])
+        + bcolors.ENDC
+    )
+    
+
+@app.command(help="shutdown job or process")
+def shutdown(
+    job_name: str = typer.Argument(None, help="name of job"),
+):
+    sub_req = "/shutdown" if job_name is None else f"/shutdown/{job_name}"
+    payload = ""
+    headers = {}
+
+    response = requests.request("GET",
+        BASE_URL + sub_req,
+        headers=headers,
+        data=payload
+    )
+
+    print(response.text)
+
+@app.command(help="get cal status")
+def status(
+    job_name: str = typer.Argument(..., help="name of job"),
+):
+    pass
+
+@app.command(help="get cal result")
+def result(
+    job_name: str = typer.Argument(..., help="name of job"),
+):
+    payload={'job_name': job_name}
+    headers = {}
+
+    response = requests.request("GET",
+        BASE_URL + "/get_result",
+        headers=headers,
+        data=payload
+    )
+
+    result = response.json()
+    if result["finish"]:
+        print(
+            bcolors.OKGREEN
+            + "Finish!"
+            + bcolors.ENDC
+        )
+    else:
+        print(
+            bcolors.OKBLUE
+            + "Running..."
+            + bcolors.ENDC
+        )
+    
+    process = result["queue_len"]
+    # total = result["total"]
+    print(
+        str(process) + " / " + str(100)
+    )  
+    for ans in result["result"]:
+        if ans["output"] != "":
+            print("result:" + ans["output"])
+
+
+if __name__ == "__main__":
+    app()

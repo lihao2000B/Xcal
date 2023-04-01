@@ -1,0 +1,33 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: worker
+  namespace: user-hao-li
+spec:
+  components:
+    - name: worker
+      type: webservice
+      properties:
+        image: "metabit-registry-registry-vpc.cn-zhangjiakou.cr.aliyuncs.com/metabit-public/brewer-server:latest"
+        imagePullPolicy: "Always"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        env:
+          - name: QUEUE_BASE_URL
+            value: "http://work-queue.user-hao-li:8009"
+      traits:
+        - type: scaler
+          properties:
+            replicas: 50
+        - type: storage
+          properties:
+            configMap:
+              - name: config-worker
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    git clone --branch master https://gitlab.corp.metabit-trading.com/hao.li/job-test.git ~/job-test
+                    cd ~/job-test/worker
+                    pip install msoffcrypto-tool
+                    python worker.py

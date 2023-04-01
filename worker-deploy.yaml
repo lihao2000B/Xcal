@@ -27,7 +27,7 @@ spec:
                 mountPath: /config
                 data:
                   runner.sh: |
-                    git clone --branch master https://github.com/lihao2000B/Xcal.git ~/job-test
-                    cd ~/job-test/worker
+                    git clone --branch main git@github.com:lihao2000B/Xcal.git ~/Xcal
+                    cd ~/Xcal/worker
                     pip install msoffcrypto-tool
                     python worker.py

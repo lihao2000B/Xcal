@@ -30,7 +30,7 @@ from typer import Argument
 
 app = typer.Typer()
 
-BASE_URL = "http://10.72.16.50:30114"
+BASE_URL = "http://10.72.16.50:32585"
 
 WORK_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent / "workdir"
 

@@ -1,0 +1,207 @@
+from pyexpat import model
+from typing import List
+from collections import defaultdict
+from pathlib import Path
+from queue import Queue
+from fastapi import FastAPI
+from fastapi import Body
+from loguru import logger
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, status
+from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
+import os
+import shutil
+import zipfile
+from starlette.background import BackgroundTask
+
+app = FastAPI()
+work_queue = Queue()
+work_result_dict = defaultdict(Queue)
+work_data_dict = defaultdict(list)
+JOB_BASE_PATH = Path(os.path.dirname(os.path.realpath(__file__))) / "job"
+job_work_count = defaultdict(int)
+
+def init():
+    while not work_queue.empty():
+        work_queue.get()
+    work_result_dict.clear()
+    work_data_dict.clear()
+    job_work_count.clear()
+    if JOB_BASE_PATH.exists():
+        shutil.rmtree(JOB_BASE_PATH)
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "Queue"}
+
+
+@app.get("/shutdown")
+def shut_down():
+    init()
+    return {
+        "clear": True
+    }
+
+
+@app.post("/create_job")
+async def create_job(
+    files: List[UploadFile] = File(..., description="Multiple files as UploadFile"),
+    job_name: str = Form(...),
+):
+    job_path = JOB_BASE_PATH / job_name
+
+    try:
+        job_path.mkdir(parents=True)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job already existed",
+        )
+
+    for file in files:
+        job_file_path = job_path / file.filename
+        with job_file_path.open("wb+") as f:
+            f.write(await file.read())
+
+    work_data_dict[job_name] = [file.filename for file in files]
+    job_work_count[job_name] = 0
+    while not work_result_dict[job_name].empty():  
+        work_result_dict[job_name].get()
+
+    return {"filenames": [file.filename for file in files]}
+
+
+@app.post("/push_data")
+async def append_data(
+    data_files: List[UploadFile] = File(..., description="Multiple files as UploadFile"),
+    job_name: str = Form(...),
+):
+    job_path = JOB_BASE_PATH / job_name
+
+    if not job_path.exists():
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Job not existed, create job first",
+        )
+    
+    job_work_count[job_name] = job_work_count[job_name] + 1
+    zip_file = zipfile.ZipFile(job_path / (job_name + str(job_work_count[job_name]) + ".zip"), "w")
+    zip_file.comment = job_name.encode()
+    for file in work_data_dict[job_name]:
+        file_path = job_path / file
+        zip_file.write(file_path, file)
+
+    (job_path / str(job_work_count[job_name])).mkdir(parents=True)
+    for data_file in data_files:
+        job_file_path = job_path / str(job_work_count[job_name]) / data_file.filename
+        with job_file_path.open("wb+") as f:
+            f.write(await data_file.read())
+        zip_file.write(job_file_path, data_file.filename)
+
+    zip_file.close()
+
+    work_job_info = {
+        "job_name": job_name,
+        "work_zip_file": zip_file.filename
+    }
+    
+    work_queue.put(work_job_info)
+    return {
+        "work_queue_len": job_work_count[job_name]
+    }
+
+
+@app.get("/pop_work")
+async def pop_queue():
+    if work_queue.empty():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Empty",
+        )
+    try:
+        work_job_info = work_queue.get()
+        
+        work_zip_file = work_job_info["work_zip_file"]
+        job_name = work_job_info["job_name"]
+        job_path = JOB_BASE_PATH / job_name
+
+        return FileResponse(
+            path=job_path / work_zip_file
+            
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="file not exist",
+        )
+        
+
+@app.get("/finish_job")
+def clear_job(
+    job_name: str = Body(...)
+):
+    while not work_result_dict[job_name].empty():
+        work_result_dict[job_name].get()
+    work_data_dict[job_name].clear()
+    job_work_count[job_name] = 0
+
+    temp_list = []
+    while not work_queue.empty():
+        temp_list.append(work_queue.get())
+    
+    for work in temp_list:
+        if work["job_name"] != job_name:
+            work_queue.put(work)
+    
+    job_path = JOB_BASE_PATH / job_name
+    if job_path.exists():
+        shutil.rmtree(job_path)
+    return {
+        "job_name": job_name,
+        "len_job_work_count": job_work_count[job_name],
+        "len_work_data_dict": len(work_data_dict[job_name])
+    }
+
+
+@app.post("/finish_work")
+def append_queue(
+    job_name: str = Body(...),
+    job_result: dict = Body(...),
+):
+    if job_work_count[job_name] == 0:
+        return {
+            "queue_len": 0
+        }
+    work_result_dict[job_name].put(job_result)
+    return {
+        "queue_len": work_result_dict[job_name].qsize()
+    }
+
+
+@app.get("/get_result")
+def get_result(
+    job_name: str = Body(...)
+):
+    result_list = []
+    while not work_result_dict[job_name].empty():
+        result_list.append(work_result_dict[job_name].get())
+    
+    status = False
+    # 能够查询的时候进程已经被释放，count统计已经完成
+    if len(result_list) == job_work_count[job_name]:
+        status = True
+
+    for result in result_list:
+        work_result_dict[job_name].put(result)
+
+    return {
+        "finish": status,
+        "result": result_list,
+        "result_len": len(result_list),
+        "total": job_work_count[job_name]
+    }
+
+
+if JOB_BASE_PATH.exists():
+    init()

@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels: {}
+  name: work-service
+  namespace: user-hao-li
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.oam.dev/component: work-service
+  template:
+    metadata:
+      labels:
+        app.oam.dev/component: work-service
+        app.oam.dev/name: work-service
+    spec:
+      containers:
+      - command:
+        - bash
+        - /config/runner.sh
+        env:
+        - name: QUEUE_BASE_URL
+          value: http://work-queue.user-hao-li:8009
+        image: metabit-registry-registry-vpc.cn-zhangjiakou.cr.aliyuncs.com/metabit-public/brewer-server:latest
+        imagePullPolicy: Always
+        name: work-service
+        ports:
+        - containerPort: 8006
+          name: port-8006
+          protocol: TCP
+        volumeDevices: []
+        volumeMounts:
+        - mountPath: /config
+          name: configmap-config-work-service
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: config-work-service
+        name: configmap-config-work-service
+
+---
+## From the auxiliary workload 
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels: {}
+  name: work-service
+  namespace: user-hao-li
+spec:
+  ports:
+  - name: port-8006
+    port: 8006
+    protocol: TCP
+    targetPort: 8006
+  selector:
+    app.oam.dev/component: work-service
+  type: ClusterIP
+
+---
+## From the trait expose 
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels: {}
+  name: work-service
+  namespace: user-hao-li
+spec:
+  ports:
+  - name: port-8006
+    port: 8006
+    targetPort: 8006
+  selector:
+    app.oam.dev/component: work-service
+  type: NodePort
+
+---
+## From the trait storage 
+apiVersion: v1
+data:
+  runner.sh: |-
+    git clone --branch master https://gitlab.corp.metabit-trading.com/hao.li/job-test.git ~/job-test
+    cd ~/job-test/service
+    uvicorn main:app --host=0.0.0.0 --port=8006
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels: {}
+  name: config-work-service
+  namespace: user-hao-li
+
+---

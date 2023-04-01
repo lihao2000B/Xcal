@@ -1,0 +1,4 @@
+deb http://mirrors-ssl.aliyuncs.com/debian/ buster main non-free contrib
+deb http://mirrors-ssl.aliyuncs.com/debian-security buster/updates main
+deb http://mirrors-ssl.aliyuncs.com/debian/ buster-updates main non-free contrib
+deb http://mirrors-ssl.aliyuncs.com/debian/ buster-backports main non-free contrib

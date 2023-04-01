@@ -8,7 +8,7 @@ spec:
     - name: worker
       type: webservice
       properties:
-        image: "metabit-registry-registry-vpc.cn-zhangjiakou.cr.aliyuncs.com/metabit-public/brewer-server:latest"
+        image: "lihao2000b/xcal:1.0"
         imagePullPolicy: "Always"
         clusters: ["local"]
         namespace: user-hao-li
@@ -27,7 +27,7 @@ spec:
                 mountPath: /config
                 data:
                   runner.sh: |
-                    git clone --branch master https://gitlab.corp.metabit-trading.com/hao.li/job-test.git ~/job-test
+                    git clone --branch master https://github.com/lihao2000B/Xcal.git ~/job-test
                     cd ~/job-test/worker
                     pip install msoffcrypto-tool
                     python worker.py

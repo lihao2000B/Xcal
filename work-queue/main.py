@@ -111,30 +111,6 @@ async def append_data(
     return {
         "work_queue_len": job_work_count[job_name]
     }
-
-
-@app.get("/pop_work")
-async def pop_queue():
-    if work_queue.empty():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Empty",
-        )
-    try:
-        work_job_info = work_queue.get()
-        
-        work_zip_file = work_job_info["work_zip_file"]
-        job_name = work_job_info["job_name"]
-        job_path = JOB_BASE_PATH / job_name
-
-        return FileResponse(
-            path=job_path / work_zip_file
-        )
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="file not exist",
-        )
         
 
 @app.get("/finish_job")
@@ -164,21 +140,6 @@ def clear_job(
     }
 
 
-@app.post("/finish_work")
-def append_queue(
-    job_name: str = Body(...),
-    job_result: dict = Body(...),
-):
-    if job_work_count[job_name] == 0:
-        return {
-            "queue_len": 0
-        }
-    work_result_dict[job_name].put(job_result)
-    return {
-        "queue_len": work_result_dict[job_name].qsize()
-    }
-
-
 @app.get("/get_result")
 def get_result(
     job_name: str = Body(...)
@@ -201,6 +162,54 @@ def get_result(
         "result_len": len(result_list),
         "total": job_work_count[job_name]
     }
+
+
+# ****** worker function ******
+@app.post("/finish_work")
+def append_queue(
+    job_name: str = Body(...),
+    job_result: dict = Body(...),
+):
+    if job_work_count[job_name] == 0:
+        return {
+            "queue_len": 0
+        }
+    work_result_dict[job_name].put(job_result)
+    return {
+        "queue_len": work_result_dict[job_name].qsize()
+    }
+
+
+@app.get("/pop_work")
+def pop_queue():
+    if work_queue.empty():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Empty",
+        )
+    try:
+        work_job_info = work_queue.get()
+        
+        work_zip_file = work_job_info["work_zip_file"]
+        job_name = work_job_info["job_name"]
+        job_path = JOB_BASE_PATH / job_name
+
+        return FileResponse(
+            path=job_path / work_zip_file
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="file not exist",
+        )
+
+
+@app.post("/sync_status")
+def sync_status(
+    workerId: str = Body(...),
+    worker_status: dict = Body(...),
+):
+    pass
 
 
 if JOB_BASE_PATH.exists():

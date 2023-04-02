@@ -18,7 +18,7 @@ spec:
       traits:
         - type: scaler
           properties:
-            replicas: 50
+            replicas: 5
         - type: storage
           properties:
             configMap:

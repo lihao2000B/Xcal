@@ -1,11 +1,11 @@
 apiVersion: core.oam.dev/v1beta1
 kind: Application
 metadata:
-  name: work-service
+  name: work-service2
   namespace: user-hao-li
 spec:
   components:
-    - name: work-service
+    - name: work-service2
       type: webservice
       properties:
         image: "lihao2000b/xcal:1.0"
@@ -29,7 +29,7 @@ spec:
         - type: storage
           properties:
             configMap:
-              - name: config-work-service
+              - name: config-work-service2
                 mountPath: /config
                 data:
                   runner.sh: |

@@ -29,7 +29,7 @@ from typer import Argument
 
 app = typer.Typer()
 
-BASE_URL = "http://39.98.230.181:8006"
+BASE_URL = "http://xcal.vpc-lh2000.com"
 
 WORK_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent / "workdir"
 

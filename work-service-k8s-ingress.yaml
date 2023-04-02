@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    app.oam.dev/appRevision: ""
+    app.oam.dev/component: work-service2
+    app.oam.dev/name: work-service2
+    app.oam.dev/namespace: user-hao-li
+    app.oam.dev/resourceType: WORKLOAD
+    workload.oam.dev/type: webservice
+  name: work-service2
+  namespace: user-hao-li
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.oam.dev/component: work-service2
+  template:
+    metadata:
+      labels:
+        app.oam.dev/component: work-service2
+        app.oam.dev/name: work-service2
+    spec:
+      containers:
+      - command:
+        - bash
+        - /config/runner.sh
+        env:
+        - name: QUEUE_BASE_URL
+          value: http://work-queue.user-hao-li:8009
+        image: lihao2000b/xcal:1.0
+        name: work-service2
+        ports:
+        - containerPort: 8006
+          name: port-8006
+          protocol: TCP
+        volumeDevices: []
+        volumeMounts:
+        - mountPath: /config
+          name: configmap-config-work-service2
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: config-work-service2
+        name: configmap-config-work-service2
+
+---
+## From the trait gateway 
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    app.oam.dev/appRevision: ""
+    app.oam.dev/component: work-service2
+    app.oam.dev/name: work-service2
+    app.oam.dev/namespace: user-hao-li
+    app.oam.dev/resourceType: TRAIT
+    trait.oam.dev/resource: service
+    trait.oam.dev/type: gateway
+  name: work-service2
+  namespace: user-hao-li
+spec:
+  ports:
+  - port: 8006
+    targetPort: 8006
+  selector:
+    app.oam.dev/component: work-service2
+
+---
+## From the trait gateway 
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app.oam.dev/appRevision: ""
+    app.oam.dev/component: work-service2
+    app.oam.dev/name: work-service2
+    app.oam.dev/namespace: user-hao-li
+    app.oam.dev/resourceType: TRAIT
+    trait.oam.dev/resource: ingress
+    trait.oam.dev/type: gateway
+  name: work-service2
+  namespace: user-hao-li
+spec:
+  rules:
+  - host: xcal.vpc-lh2000.com
+    http:
+      paths:
+      - backend:
+          serviceName: work-service2
+          servicePort: 8006
+        path: /
+        pathType: ImplementationSpecific
+
+---
+## From the trait storage 
+apiVersion: v1
+data:
+  runner.sh: |
+    git clone --branch main https://oauth2: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@github.com/lihao2000B/Xcal.git ~/Xcal
+    cd ~/Xcal/service
+    uvicorn main:app --host=0.0.0.0 --port=8006
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    app.oam.dev/appRevision: ""
+    app.oam.dev/component: work-service2
+    app.oam.dev/name: work-service2
+    app.oam.dev/namespace: user-hao-li
+    app.oam.dev/resourceType: TRAIT
+    trait.oam.dev/resource: configmap-config-work-service2
+    trait.oam.dev/type: storage
+  name: config-work-service2
+  namespace: user-hao-li
+
+---

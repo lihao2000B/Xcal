@@ -25,7 +25,7 @@ spec:
         - type: expose
           properties:
             port: [8006]
-            type: "NodePort"
+            type: "LoadBalancer"
         - type: storage
           properties:
             configMap:

@@ -12,7 +12,6 @@ import subprocess
 import sys
 import random
 from typing import Dict, List, Optional
-import git
 from pathlib import Path
 
 import requests
@@ -30,7 +29,7 @@ from typer import Argument
 
 app = typer.Typer()
 
-BASE_URL = "http://10.72.16.50:32585"
+BASE_URL = "http://39.98.174.238:32397"
 
 WORK_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent / "workdir"
 

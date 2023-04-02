@@ -22,7 +22,6 @@ spec:
         - /config/runner.sh
         env: []
         image: metabit-registry-registry-vpc.cn-zhangjiakou.cr.aliyuncs.com/metabit-public/brewer-server:latest
-        imagePullPolicy: Always
         name: work-queue
         ports:
         - containerPort: 8009

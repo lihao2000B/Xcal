@@ -1,0 +1,38 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: work-service2
+  namespace: user-hao-li
+spec:
+  components:
+    - name: work-service2
+      type: webservice
+      properties:
+        image: "lihao2000b/xcal:1.0"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        env:
+          - name: QUEUE_BASE_URL
+            value: "http://work-queue.user-hao-li:8009"
+        ports:
+          - port: 8006
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+        - type: gateway
+          properties:
+            domain: xcal.vpc-lh2000.com
+            http:
+              "/": 8006
+        - type: storage
+          properties:
+            configMap:
+              - name: config-work-service2
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    git clone --branch main https://oauth2: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@github.com/lihao2000B/Xcal.git ~/Xcal
+                    cd ~/Xcal/service
+                    uvicorn main:app --host=0.0.0.0 --port=8006

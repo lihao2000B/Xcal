@@ -9,6 +9,32 @@ import time
 
 WORK_BASE_PATH = Path(os.path.dirname(os.path.realpath(__file__))) / "workdir"
 BASE_URL = os.getenv("QUEUE_BASE_URL","http://work-queue.user-hao-li:8009")
+WORKER_ID = ""
+
+def init():
+    while True:
+        payload = ""
+        headers = {}
+        response = requests.request("GET", BASE_URL + "/worker_init", headers=headers, data=payload)
+        if response.status_code == 200:
+            global WORKER_ID 
+            WORKER_ID = response.json()["id"]
+            return
+        else:
+            time.sleep(120)
+    
+
+def sync_status(status: str):
+    payload = json.dumps({
+        "worker_id": WORKER_ID,
+        "worker_status": status
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    return requests.request("POST", BASE_URL + "/sync_status", headers=headers, data=payload)
+
 
 def worker():
     while True:
@@ -26,6 +52,9 @@ def worker():
                 job_name = zip_file.comment.decode()
                 zip_file.extractall(WORK_BASE_PATH)
 
+                # update status
+                sync_status("running")
+
                 work_subprocess = subprocess.Popen(
                     ["python", "work.py"],
                     cwd=WORK_BASE_PATH,
@@ -34,6 +63,7 @@ def worker():
                     encoding="utf-8",
                 )
                 output, error = work_subprocess.communicate()
+                sync_status("waiting")
 
                 if error:
                     payload = json.dumps({
@@ -68,10 +98,13 @@ def worker():
                 if WORK_BASE_PATH.exists():
                     shutil.rmtree(WORK_BASE_PATH)
             else:
-                time.sleep(60)
+                sync_status("waiting")
+                time.sleep(120)
         except Exception:
-            time.sleep(60)
+            sync_status("waiting")
+            time.sleep(120)
 
 
 if __name__ == "__main__":
+    init()
     worker()

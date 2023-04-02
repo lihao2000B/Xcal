@@ -227,3 +227,12 @@ def shutdown_job(job_name: str):
     result = response.json()
     return result
     
+
+@app.get("/worker")
+def worker():
+    payload = ""
+    headers = {}
+
+    response = requests.request("GET", BASE_URL + "/worker", headers=headers, data=payload)
+    result = response.json()
+    return result

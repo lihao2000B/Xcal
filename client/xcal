@@ -157,11 +157,13 @@ def shutdown(
 
     print(response.text)
 
+
 @app.command(help="get cal status")
 def status(
     job_name: str = typer.Argument(..., help="name of job"),
 ):
     pass
+
 
 @app.command(help="get cal result")
 def result(

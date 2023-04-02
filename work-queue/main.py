@@ -15,11 +15,19 @@ import zipfile
 from starlette.background import BackgroundTask
 
 app = FastAPI()
+
+# **** job ****
 work_queue = Queue()
 work_result_dict = defaultdict(Queue)
 work_data_dict = defaultdict(list)
-JOB_BASE_PATH = Path(os.path.dirname(os.path.realpath(__file__))) / "job"
 job_work_count = defaultdict(int)
+
+# **** worker ****
+worker_status = defaultdict(str)
+worker_list = list()
+worker_id = 0
+
+JOB_BASE_PATH = Path(os.path.dirname(os.path.realpath(__file__))) / "job"
 
 def init():
     while not work_queue.empty():
@@ -206,10 +214,36 @@ def pop_queue():
 
 @app.post("/sync_status")
 def sync_status(
-    workerId: str = Body(...),
-    worker_status: dict = Body(...),
+    worker_id: str = Body(...),
+    worker_status: str = Body(...),
 ):
-    pass
+    try:
+        worker_status[worker_id] = worker_status
+        return {
+            "ack": True
+        }
+    except Exception:
+        return{
+            "ack": False
+        }
+
+
+@app.post("/worker_init")
+def worker_init():
+    worker_id = worker_id + 1
+    worker_list.append(str(worker_id))
+    worker_status[str(worker_id)] = "waiting"
+    return {
+        "id": str(worker_id)
+    }
+
+
+@app.get("/worker")
+def worker():
+    return{
+        "worker_list": worker_list,
+        "worker_status": worker_status
+    }
 
 
 if JOB_BASE_PATH.exists():

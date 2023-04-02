@@ -29,7 +29,7 @@ from typer import Argument
 
 app = typer.Typer()
 
-BASE_URL = "http://47.92.251.4:8006"
+BASE_URL = "http://39.98.230.181:8006"
 
 WORK_PATH = Path(os.path.dirname(os.path.realpath(__file__))).parent / "workdir"
 
@@ -190,10 +190,10 @@ def result(
             + bcolors.ENDC
         )
     
-    process = result["queue_len"]
-    # total = result["total"]
+    process = result["result_len"]
+    total = result["total"]
     print(
-        str(process) + " / " + str(100)
+        str(process) + " / " + str(total)
     )  
     for ans in result["result"]:
         if ans["output"] != "":

@@ -15,7 +15,7 @@ with open(workbook_file_path, "rb") as fin,\
         try: 
             encrypted.load_key(password=password)
             encrypted.decrypt(tfp)
-            print(password + "accept !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print(password + " accept")
             sys.exit(0)
         except Exception:
             pass

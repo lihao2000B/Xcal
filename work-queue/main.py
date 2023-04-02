@@ -90,6 +90,7 @@ async def append_data(
     zip_file.comment = job_name.encode()
     for file in work_data_dict[job_name]:
         file_path = job_path / file
+        # file_path 是文件路径，file是在压缩包内的名称
         zip_file.write(file_path, file)
 
     (job_path / str(job_work_count[job_name])).mkdir(parents=True)
@@ -128,7 +129,6 @@ async def pop_queue():
 
         return FileResponse(
             path=job_path / work_zip_file
-            
         )
     except Exception:
         raise HTTPException(

@@ -162,6 +162,26 @@ def shutdown(
 def status(
     job_name: str = typer.Argument(..., help="name of job"),
 ):
+    payload=""
+    headers = {}
+
+    response = requests.request("GET",
+        BASE_URL + "/worker",
+        headers=headers,
+        data=payload
+    )
+
+    result = response.json()
+    print(result)
+    # 一个列表，能够显示出每一个任务的大致信息
+    # 后面跟当前任务状态
+
+    # 三种状态
+
+    # 已完成
+    # 当前正在进行这个任务的workerId
+    # 等待
+    
     pass
 
 

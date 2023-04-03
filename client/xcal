@@ -185,6 +185,21 @@ def status(
     pass
 
 
+@app.command(help="get worker status")
+def worker():
+    payload=""
+    headers = {}
+
+    response = requests.request("GET",
+        BASE_URL + "/worker",
+        headers=headers,
+        data=payload
+    )
+
+    result = response.json()
+    print(result)
+
+
 @app.command(help="get cal result")
 def result(
     job_name: str = typer.Argument(..., help="name of job"),

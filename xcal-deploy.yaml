@@ -1,0 +1,131 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: xcal
+  namespace: user-hao-li
+spec:
+  components:
+    - name: ssh-secret
+      type: sealedsecret
+      properties:
+        data:
+          id_rsa: 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
+          known_hosts: AgBRySolVmXwS4CgOmemFcmw3L5dLBgfqTJQaJ1P12qgdf+NpC2uo4TYlu+l+NnQ+SXH5gGdmIOmRNClAb9M/Xsa/FS1M4jezMJ25wx1WXleP7xlLOtBKI4Nj6fNcUAKx1UrYI5hfShmgkDTObT1dpMBNbEDyOfWLxuF8UdiSJDlZ+RK1GP3HiFt2mNDEtGNfSGOBM6Z23V8w2y9FHVnUxSf3d3IuhpO7Hw7y0F5fD0xYF8XxkgsCjbiQbpXYOhZ2Ykqo1PgY4+VOLTafG4vZjeVVQaT5zkVJhZ6jkZtI8C8583IFluFQ/BjbrpRXDb7HhtfGPWQAlF07JILpEsPnwHEDP2Cz7SKMC/V/MdqyZJpwlZrSqtYz3YY1zRbX16iGhqHfDKkaQ5/HvmwYT2ESL9s2ZYnHdQ2dUQiR9Ja1vGy5n+WonbyA31r706O8X5zn4t/WY9g9Pa5Qi0ID9TZ817TcTf61MMxO1X6amIENQV8jDdzY4qWOiENHHN0ef+Njrs5+XTryuOudlcgbz3TVWSGT/6ULwwY2LUOuYe9ekgb6HGRhSHrhbtdycGP9vqhC7iFjn9QJaUBCkHu4Ue+lKvV16zPkHo3hdfGD/Izp8CmoAQqXhvHWrRYWi0DEf1wjspbIilzo7ZnUVN32UspBuwdOXwh9rd/RTSRwHCJsYooj7nw7W2aMZ1F8YtlmkWYAk3W+4K4aRlKqNNsGQ+bhrCbQYC/UYUu8kAluEa1E2Zky4Om1CzsdW1tf+awKbMQtcW8pbn5Wy7X9RxvwQMcH1Nvgq7ttd/TJ2hGiGQmT4oDhEWy7H2mBj1RCvAsWMCLFLjraAezsRhjSfhfYxu6RWN6hAHiecimXq98YxTbjQhhKrc8TtuHP7cloN9t6XMQFgz603iSYJAMpSTlPWwQTEYLexoB+kSsPMww8FvpZI1dK1gEj9Keo8c/anlVkqpQF0iCKhZJQ5nHz77OBl7oaEK+VHnPF1SbFs380mDE9TfttXrH3MaUtlA8NGlO4s1nueKbG+UOH50pidJ/l4YRsq6HJQ3lfs1eeFOWlGe0EnEsEYqwlxLC/J8QUa7F83uV5E8HVJPRlUlEzh6gObcl+7R/BZrVWKgnhCUtYss8LiezZfhbmXTKuAEm1RXhHV11fuHAtgnqICgdXmaxIB6Iifg2E2xHPU0QfCy+u9WH4Rsq83NOIA7Uj4iFNdE1zXcBlovLiaf3A1nBh+B6ncRt5jg7kUcxzLef8J4pPTpd767xB6dMjUA6gRuaV1H9NFPonRyYHc7hvvOCVCqkMqY=
+
+    - name: work-service
+      type: webservice
+      dependsOn:
+        - ssh-secret
+      properties:
+        image: "lihao2000b/xcal:1.0"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        env:
+          - name: QUEUE_BASE_URL
+            value: "http://work-queue.user-hao-li:8009"
+        volumeMounts:
+          secret:
+            - name: "volume-ssh"
+              mountPath: "/root/temp_ssh"
+              secretName: "ssh-secret"
+        ports:
+          - port: 8006
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+        - type: gateway
+          properties:
+            domain: xcal.vpc-lh2000.com
+            http:
+              "/": 8006
+        - type: storage
+          properties:
+            configMap:
+              - name: config-work-service
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    mkdir /root/.ssh
+                    cp /root/temp_ssh/id_rsa /root/.ssh/id_rsa
+                    cp /root/temp_ssh/known_hosts /root/.ssh/known_hosts
+                    chmod 600 ~/.ssh/id_rsa
+                    git clone --branch main git@github.com:lihao2000B/Xcal.git ~/Xcal
+                    cd ~/Xcal/service
+                    uvicorn main:app --host=0.0.0.0 --port=8006
+
+    - name: work-queue
+      type: webservice
+      dependsOn:
+        - ssh-secret
+      properties:
+        image: "lihao2000b/xcal:1.0"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        volumeMounts:
+          secret:
+            - name: "volume-ssh"
+              mountPath: "/root/temp_ssh"
+              secretName: "ssh-secret"
+        ports:
+          - port: 8009
+            expose: true
+      traits:
+        - type: scaler
+          properties:
+            replicas: 1
+        - type: storage
+          properties:
+            configMap:
+              - name: config-work-queue
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    mkdir /root/.ssh
+                    cp /root/temp_ssh/id_rsa /root/.ssh/id_rsa
+                    cp /root/temp_ssh/known_hosts /root/.ssh/known_hosts
+                    chmod 600 ~/.ssh/id_rsa
+                    git clone --branch main git@github.com:lihao2000B/Xcal.git ~/Xcal
+                    cd ~/Xcal/work-queue
+                    uvicorn main:app --host=0.0.0.0 --port=8009
+
+    - name: worker
+      type: webservice
+      dependsOn:
+        - ssh-secret
+        - work-queue
+      properties:
+        image: "lihao2000b/xcal:1.0"
+        clusters: ["local"]
+        namespace: user-hao-li
+        cmd: ["bash", "/config/runner.sh"]
+        # cmd: ["sleep", "3600"]
+        volumeMounts:
+          secret:
+            - name: "volume-ssh"
+              mountPath: "/root/temp_ssh"
+              secretName: "ssh-secret"
+        env:
+          - name: QUEUE_BASE_URL
+            value: "http://work-queue.user-hao-li:8009"
+      traits:
+        - type: scaler
+          properties:
+            replicas: 50
+        - type: storage
+          properties:
+            configMap:
+              - name: config-worker
+                mountPath: /config
+                data:
+                  runner.sh: |
+                    mkdir /root/.ssh
+                    cp /root/temp_ssh/id_rsa /root/.ssh/id_rsa
+                    cp /root/temp_ssh/known_hosts /root/.ssh/known_hosts
+                    chmod 600 ~/.ssh/id_rsa
+                    git clone --branch main git@github.com:lihao2000B/Xcal.git ~/Xcal
+                    cd ~/Xcal/worker
+                    pip install msoffcrypto-tool
+                    python worker.py

@@ -228,7 +228,7 @@ def sync_status(
         }
 
 
-@app.post("/worker_init")
+@app.get("/worker_init")
 def worker_init():
     worker_id = worker_id + 1
     worker_list.append(str(worker_id))

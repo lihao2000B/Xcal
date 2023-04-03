@@ -225,7 +225,7 @@ def result(
     )  
     for ans in result["result"]:
         if ans["output"] != "":
-            print("result:" + ans["output"])
+            print("result: " + ans["output"])
 
 
 if __name__ == "__main__":

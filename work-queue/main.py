@@ -172,6 +172,14 @@ def get_result(
     }
 
 
+@app.get("/worker")
+def worker():
+    return{
+        "worker_list": worker_list,
+        "worker_status": worker_status
+    }
+
+
 # ****** worker function ******
 @app.post("/finish_work")
 def append_queue(
@@ -215,10 +223,11 @@ def pop_queue():
 @app.post("/sync_status")
 def sync_status(
     worker_id: str = Body(...),
-    worker_status: str = Body(...),
+    worker_statu: str = Body(...),
 ):
     try:
-        worker_status[worker_id] = worker_status
+        logger.info(f"Status sync worker_id: {worker_id} worker_status: {worker_statu}")
+        worker_status[worker_id] = worker_statu
         return {
             "ack": True
         }
@@ -232,18 +241,14 @@ def sync_status(
 def worker_init():
     global worker_id
     worker_id = worker_id + 1
+    
     worker_list.append(str(worker_id))
     worker_status[str(worker_id)] = "waiting"
+
+    logger.info(f"Worker init, Id: {worker_id}")
+
     return {
         "id": str(worker_id)
-    }
-
-
-@app.get("/worker")
-def worker():
-    return{
-        "worker_list": worker_list,
-        "worker_status": worker_status
     }
 
 

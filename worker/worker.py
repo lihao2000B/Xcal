@@ -27,7 +27,7 @@ def init():
 def sync_status(status: str):
     payload = json.dumps({
         "worker_id": WORKER_ID,
-        "worker_status": status
+        "worker_statu": status
     })
     headers = {
         'Content-Type': 'application/json'

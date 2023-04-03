@@ -15,7 +15,7 @@ spec:
         volumeMounts:
           secret:
             - name: "volume-ssh"
-              mountPath: "/root/.ssh"
+              mountPath: "/root/temp_ssh"
               secretName: "ssh-secret"
         ports:
           - port: 8009
@@ -31,6 +31,10 @@ spec:
                 mountPath: /config
                 data:
                   runner.sh: |
-                    git clone --branch main https://github.com/lihao2000B/Xcal.git ~/Xcal
+                    mkdir /root/.ssh
+                    cp /root/temp_ssh/id_rsa /root/.ssh/id_rsa
+                    cp /root/temp_ssh/known_hosts /root/.ssh/known_hosts
+                    chmod 600 ~/.ssh/id_rsa
+                    git clone --branch main git@github.com:lihao2000B/Xcal.git ~/Xcal
                     cd ~/Xcal/work-queue
                     uvicorn main:app --host=0.0.0.0 --port=8009

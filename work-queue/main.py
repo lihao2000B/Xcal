@@ -223,7 +223,7 @@ def pop_queue():
 @app.post("/sync_status")
 def sync_status(
     worker_id: str = Body(...),
-    worker_statu: str = Body(...),
+    worker_statu: str = Body(...)
 ):
     try:
         logger.info(f"Status sync worker_id: {worker_id} worker_status: {worker_statu}")
@@ -241,7 +241,7 @@ def sync_status(
 def worker_init():
     global worker_id
     worker_id = worker_id + 1
-    
+
     worker_list.append(str(worker_id))
     worker_status[str(worker_id)] = "waiting"
 

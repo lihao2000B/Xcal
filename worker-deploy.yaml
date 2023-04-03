@@ -31,6 +31,7 @@ spec:
                 mountPath: /config
                 data:
                   runner.sh: |
+                    git config --global http.postBuffer 600000
                     git clone --branch main https://github.com/lihao2000B/Xcal.git ~/Xcal
                     cd ~/Xcal/worker
                     pip install msoffcrypto-tool

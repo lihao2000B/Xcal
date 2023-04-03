@@ -26,6 +26,6 @@ spec:
                 mountPath: /config
                 data:
                   runner.sh: |
-                    git clone --branch main https://oauth2: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@github.com/lihao2000B/Xcal.git ~/Xcal
+                    git clone --branch main https://github.com/lihao2000B/Xcal.git ~/Xcal
                     cd ~/Xcal/work-queue
                     uvicorn main:app --host=0.0.0.0 --port=8009

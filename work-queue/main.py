@@ -230,6 +230,7 @@ def sync_status(
 
 @app.get("/worker_init")
 def worker_init():
+    global worker_id
     worker_id = worker_id + 1
     worker_list.append(str(worker_id))
     worker_status[str(worker_id)] = "waiting"

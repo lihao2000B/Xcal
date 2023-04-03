@@ -83,11 +83,12 @@ def create(
 
     for script_file in secript_list:
         temp_file = open(script_file, 'rb')
+        file_name = os.path.basename(script_file)
         files.append(
             (
                 'script_files',
                 (
-                    temp_file.name,
+                    file_name,
                     temp_file,
                     # 'application/octet-stream'
                 )
@@ -96,11 +97,12 @@ def create(
     
     for data_file in data_list:
         temp_file = open(data_file,'rb')
+        file_name = os.path.basename(data_file)
         files.append(
             (
                 'data_files',
                 (
-                    temp_file.name,
+                    file_name,
                     temp_file,
                     # 'application/octet-stream'
                 )
@@ -162,17 +164,6 @@ def shutdown(
 def status(
     job_name: str = typer.Argument(..., help="name of job"),
 ):
-    payload=""
-    headers = {}
-
-    response = requests.request("GET",
-        BASE_URL + "/worker",
-        headers=headers,
-        data=payload
-    )
-
-    result = response.json()
-    print(result)
     # 一个列表，能够显示出每一个任务的大致信息
     # 后面跟当前任务状态
 

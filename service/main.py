@@ -242,9 +242,7 @@ def worker():
 def job_status(
     job_name: str = Body(...)
 ):
-    payload = {
-        "job_name": job_name
-    }
+    payload = json.dumps(job_name)
     headers = {}
 
     response = requests.request("GET", BASE_URL + "/job_status", headers=headers, data=payload)

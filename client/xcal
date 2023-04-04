@@ -166,9 +166,7 @@ def status(
     job_name: str = typer.Argument(..., help="name of job"),
 ):
     
-    payload = {
-        "job_name": job_name
-    }
+    payload = json.dumps(job_name)
     headers = {}
 
     response = requests.request("GET",

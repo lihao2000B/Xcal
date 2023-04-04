@@ -119,7 +119,7 @@ async def append_data(
 
     work_job_id_dict[job_name] = work_job_id_dict[job_name] + 1
     temp_id = work_job_id_dict[job_name]
-    logger.info(str(temp_id)
+    logger.info(str(temp_id))
     work_job_info = {
         "job_name": job_name,
         "work_zip_file": zip_file.filename,

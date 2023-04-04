@@ -23,7 +23,7 @@ work_result_dict = defaultdict(Queue)
 work_data_dict = defaultdict(list)
 job_work_count = defaultdict(int)
 work_job_id_dict = defaultdict(int)
-work_job_status = defaultdict(defaultdict(dict))
+work_job_status = defaultdict(dict)
 
 
 # **** worker ****
@@ -125,6 +125,9 @@ async def append_data(
     }
     
     # update work status
+    if ("work_" + str(temp_id)) not in work_job_status[job_name].keys():
+        work_job_status[job_name]["work_" + str(temp_id)] = {}
+
     work_job_status[job_name]["work_" + str(temp_id)].update(
         {
             "status": "waiting",
@@ -228,7 +231,8 @@ def append_queue(
     work_job_status[job_name][work_job_id].update(
         {
             "status": "finish",
-            "work_end_time_stamp": work_end_time_stamp
+            "work_end_time_stamp": work_end_time_stamp,
+            
         }
     )
 

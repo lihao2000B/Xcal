@@ -13,14 +13,17 @@ WORKER_ID = ""
 
 def init():
     while True:
-        payload = ""
-        headers = {}
-        response = requests.request("GET", BASE_URL + "/worker_init", headers=headers, data=payload)
-        if response.status_code == 200:
-            global WORKER_ID 
-            WORKER_ID = response.json()["id"]
-            return
-        else:
+        try:
+            payload = ""
+            headers = {}
+            response = requests.request("GET", BASE_URL + "/worker_init", headers=headers, data=payload)
+            if response.status_code == 200:
+                global WORKER_ID 
+                WORKER_ID = response.json()["id"]
+                return
+            else:
+                response.raise_for_status()
+        except Exception:
             time.sleep(120)
     
 

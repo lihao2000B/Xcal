@@ -236,3 +236,17 @@ def worker():
     response = requests.request("GET", BASE_URL + "/worker", headers=headers, data=payload)
     result = response.json()
     return result
+
+
+@app.get("/job_status")
+def job_status(
+    job_name: str = Body(...)
+):
+    payload = {
+        "job_name": job_name
+    }
+    headers = {}
+
+    response = requests.request("GET", BASE_URL + "/job_status", headers=headers, data=payload)
+    result = response.json()
+    return result

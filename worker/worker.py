@@ -48,6 +48,9 @@ def worker():
                 WORK_BASE_PATH.mkdir(parents=True)
                 with (WORK_BASE_PATH / "temp.zip").open("wb+") as f:
                     f.write(response.content)
+
+                work_job_id = response.headers["work_job_id"]
+                
                 zip_file = zipfile.ZipFile(WORK_BASE_PATH / "temp.zip", "r")
                 job_name = zip_file.comment.decode()
                 zip_file.extractall(WORK_BASE_PATH)
@@ -71,7 +74,8 @@ def worker():
                         "job_result": {
                             "output": error,
                             "status": False
-                        }
+                        },
+                        "work_job_id": work_job_id
                     })
                     headers = {
                         'Content-Type': 'application/json'
@@ -85,7 +89,8 @@ def worker():
                         "job_result": {
                             "output": output,
                             "status": True
-                        }
+                        },
+                        "work_job_id": work_job_id
                     })
                     headers = {
                         'Content-Type': 'application/json'

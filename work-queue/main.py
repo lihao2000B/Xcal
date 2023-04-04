@@ -22,6 +22,9 @@ work_queue = Queue()
 work_result_dict = defaultdict(Queue)
 work_data_dict = defaultdict(list)
 job_work_count = defaultdict(int)
+work_job_id_dict = defaultdict(int)
+work_job_status = defaultdict(defaultdict(dict))
+
 
 # **** worker ****
 worker_status = defaultdict(str)
@@ -37,6 +40,8 @@ def init():
     work_result_dict.clear()
     work_data_dict.clear()
     job_work_count.clear()
+    work_job_status.clear()
+    work_job_id_dict.clear()
     if JOB_BASE_PATH.exists():
         shutil.rmtree(JOB_BASE_PATH)
 
@@ -112,11 +117,22 @@ async def append_data(
 
     zip_file.close()
 
+    temp_id = work_job_id_dict[job_name] + 1
     work_job_info = {
         "job_name": job_name,
-        "work_zip_file": zip_file.filename
+        "work_zip_file": zip_file.filename,
+        "work_job_id": "work_" + str(temp_id)
     }
     
+    # update work status
+    work_job_status[job_name]["work_" + str(temp_id)].update(
+        {
+            "status": "waiting",
+            "work_end_time_stamp": "NULL",
+            "work_begin_time_stamp": "NULL"
+        }
+    )
+
     work_queue.put(work_job_info)
     return {
         "work_queue_len": job_work_count[job_name]
@@ -131,6 +147,8 @@ def clear_job(
         work_result_dict[job_name].get()
     work_data_dict[job_name].clear()
     job_work_count[job_name] = 0
+    work_job_id_dict[job_name] = 0
+    work_job_status[job_name].clear()
 
     temp_list = []
     while not work_queue.empty():
@@ -183,16 +201,37 @@ def worker():
     }
 
 
+@app.get("/job_status")
+def job_status(
+    job_name: str = Body(...)
+):
+    return{
+        "work_job_count": work_job_id_dict[job_name],
+        "work_job_status": work_job_status[job_name]
+    }
+
+
 # ****** worker function ******
 @app.post("/finish_work")
 def append_queue(
     job_name: str = Body(...),
     job_result: dict = Body(...),
+    work_job_id: str = Body(...),
 ):
     if job_work_count[job_name] == 0:
         return {
             "queue_len": 0
         }
+    
+    # update work status
+    work_end_time_stamp = time.asctime()
+    work_job_status[job_name][work_job_id].update(
+        {
+            "status": "finish",
+            "work_end_time_stamp": work_end_time_stamp
+        }
+    )
+
     work_result_dict[job_name].put(job_result)
     return {
         "queue_len": work_result_dict[job_name].qsize()
@@ -211,10 +250,24 @@ def pop_queue():
         
         work_zip_file = work_job_info["work_zip_file"]
         job_name = work_job_info["job_name"]
+
+        # update work_job status
+        work_begin_time_stamp = time.asctime()
+        work_job_id = work_job_info["work_job_id"]
+        work_job_status[job_name][work_job_id].update(
+            {
+                "status": "running",
+                "work_begin_time_stamp": work_begin_time_stamp
+            }
+        )
+
         job_path = JOB_BASE_PATH / job_name
 
         return FileResponse(
-            path=job_path / work_zip_file
+            path=job_path / work_zip_file,
+            headers={
+                "work_job_id": work_job_id
+            }
         )
     except Exception:
         raise HTTPException(

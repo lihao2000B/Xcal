@@ -179,6 +179,7 @@ def status(
 
     result = response.json()
 
+    print(result)
     table = Table()
     table.title = f"list of work status in job {job_name}"
     table.add_column("WORK_ID", style="bright_white", header_style="bright_blue")

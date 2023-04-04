@@ -117,7 +117,8 @@ async def append_data(
 
     zip_file.close()
 
-    temp_id = work_job_id_dict[job_name] + 1
+    work_job_id_dict[job_name] = work_job_id_dict[job_name] + 1
+    temp_id = work_job_id_dict[job_name]
     work_job_info = {
         "job_name": job_name,
         "work_zip_file": zip_file.filename,
@@ -125,7 +126,7 @@ async def append_data(
     }
     
     # update work status
-    if ("work_" + str(temp_id)) not in work_job_status[job_name].keys():
+    if not (("work_" + str(temp_id)) in work_job_status[job_name].keys()):
         work_job_status[job_name]["work_" + str(temp_id)] = {}
 
     work_job_status[job_name]["work_" + str(temp_id)].update(

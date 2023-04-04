@@ -11,6 +11,7 @@ import string
 import subprocess
 import sys
 import random
+import time
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -193,14 +194,17 @@ def worker():
     table = Table()
     table.title = "list of worker"
     table.add_column("WORKER_ID", style="bright_white", header_style="bright_blue")
-    table.add_column("STATE", style="bright_white", header_style="bright_blue")
+    table.add_column("STATUS", style="bright_white", header_style="bright_blue")
+    table.add_column("LAST_SYNC_TIME_STAMP", style="bright_white", header_style="bright_blue")
 
     worker_status = result["worker_status"]
     worker_list = result["worker_list"]
+    worker_time_stamp = result["worker_time_stamp"]
     for worker in worker_list:
         table.add_row(
             "worker_" + worker,
-            worker_status[worker]
+            worker_status[worker],
+            worker_time_stamp[worker]
         )
 
     console = Console()

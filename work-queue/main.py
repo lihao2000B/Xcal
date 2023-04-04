@@ -1,4 +1,5 @@
 from pyexpat import model
+import time
 from typing import List
 from collections import defaultdict
 from pathlib import Path
@@ -24,6 +25,7 @@ job_work_count = defaultdict(int)
 
 # **** worker ****
 worker_status = defaultdict(str)
+worker_time_stamp = defaultdict(str)
 worker_list = list()
 worker_id = 0
 
@@ -176,7 +178,8 @@ def get_result(
 def worker():
     return{
         "worker_list": worker_list,
-        "worker_status": worker_status
+        "worker_status": worker_status,
+        "worker_time_stamp": worker_time_stamp
     }
 
 
@@ -225,9 +228,13 @@ def sync_status(
     worker_id: str = Body(...),
     worker_statu: str = Body(...)
 ):
+    time_stamp = time.asctime()
     try:
-        logger.info(f"Status sync worker_id: {worker_id} worker_status: {worker_statu}")
+        logger.info(f"Status sync worker_id: {worker_id} worker_status: {worker_statu} worker_time_stamp: {time_stamp}")
+        
         worker_status[worker_id] = worker_statu
+        worker_time_stamp[worker_id] = time_stamp
+        
         return {
             "ack": True
         }
@@ -242,8 +249,11 @@ def worker_init():
     global worker_id
     worker_id = worker_id + 1
 
+    time_stamp = time.asctime()
+
     worker_list.append(str(worker_id))
     worker_status[str(worker_id)] = "waiting"
+    worker_time_stamp[str(worker_id)] = time_stamp
 
     logger.info(f"Worker init, Id: {worker_id}")
 

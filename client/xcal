@@ -181,6 +181,7 @@ def status(
     table.title = f"list of work status in job {job_name}"
     table.add_column("WORK_ID", style="bright_white", header_style="bright_blue")
     table.add_column("STATUS", style="bright_white", header_style="bright_blue")
+    table.add_column("MESSAGE", style="bright_white", header_style="bright_blue")
     table.add_column("BEGIN_TIME_STAMP", style="bright_white", header_style="bright_blue")
     table.add_column("FINISH_TIME_STAMP", style="bright_white", header_style="bright_blue")
 
@@ -193,9 +194,11 @@ def status(
         status = work_job_statu["status"]
         work_begin_time_stamp = work_job_statu["work_begin_time_stamp"]
         work_end_time_stamp = work_job_statu["work_end_time_stamp"]
+        message = work_job_statu["message"]
         table.add_row(
             work_job_id,
             status,
+            message,
             work_begin_time_stamp,
             work_end_time_stamp
         )

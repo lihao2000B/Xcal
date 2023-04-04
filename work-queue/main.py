@@ -234,7 +234,7 @@ def append_queue(
         {
             "status": "finish",
             "work_end_time_stamp": work_end_time_stamp,
-            
+            "message": job_result["output"]
         }
     )
 

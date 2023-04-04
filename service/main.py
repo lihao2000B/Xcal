@@ -81,20 +81,22 @@ async def create_job(
     for file in data_files:
         data_list = str((await file.read()).decode()).split(" ")
         group_count = 0
-        work_data = ""
+        work_data = []
         for data in data_list:
             if group_count < min_data_group * work_data_num:
-                if group_count != 0:
-                    work_data += " "
-                work_data += data
+
+                # add data 
+                work_data.append(data)
                 group_count = group_count + 1
+
             if group_count == min_data_group * work_data_num:
                 # process data
+
                 if (SERVICE_BASE_PATH / file.filename).exists():
                     os.remove(SERVICE_BASE_PATH / file.filename)
 
                 with (SERVICE_BASE_PATH / file.filename).open("wb+") as temp_file:
-                    temp_file.write(work_data.encode())
+                    temp_file.write(" ".join(work_data).encode())
 
                 files = []
                 payload={'job_name': job_name}
@@ -115,7 +117,7 @@ async def create_job(
                 
                 # init data
                 os.remove(SERVICE_BASE_PATH / file.filename)
-                work_data = ""
+                work_data.clear()
                 group_count = 0
         if group_count != 0:
             # process data
@@ -123,7 +125,7 @@ async def create_job(
                 os.remove(SERVICE_BASE_PATH / file.filename)
 
             with (SERVICE_BASE_PATH / file.filename).open("wb+") as temp_file:
-                temp_file.write(work_data.encode())
+                temp_file.write(" ".join(work_data).encode())
 
             files = []
             payload={'job_name': job_name}
@@ -144,7 +146,7 @@ async def create_job(
             
             # init data
             os.remove(SERVICE_BASE_PATH / file.filename)
-            work_data = ""
+            work_data.clear()
             group_count = 0
         
 

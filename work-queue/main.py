@@ -133,7 +133,8 @@ async def append_data(
         {
             "status": "waiting",
             "work_end_time_stamp": "NULL",
-            "work_begin_time_stamp": "NULL"
+            "work_begin_time_stamp": "NULL",
+            "message": ""
         }
     )
 
